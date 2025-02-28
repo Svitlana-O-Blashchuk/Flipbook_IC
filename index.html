@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>PDF Flipbook for Google Sites</title>
+    <!-- Include jQuery -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <!-- Include Turn.js from CDN -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/turn.js/3/turn.min.js"></script>
+    <style>
+        html, body {
+            width: 100%;
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            overflow: hidden;
+            background-color: transparent;
+        }
+        .flipbook-container {
+            width: 100%;
+            height: 100%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            position: relative;
+        }
+        #flipbook {
+            background-color: #fff;
+            box-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+        }
+        #flipbook .page {
+            background-color: #fff;
+        }
+        #flipbook .page img {
+            width: 100%;
+            height: 100%;
+            object-fit: contain;
+        }
+        /* Triangle Navigation Buttons */
+        .nav-btn {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 0;
+            height: 0;
+            border-top: 30px solid transparent;
+            border-bottom: 30px solid transparent;
+            cursor: pointer;
+            transition: opacity 0.3s;
+            opacity: 0.7;
+            z-index: 100;
+        }
+        .nav-btn:hover {
+            opacity: 1;
+        }
+        #prev {
+            left: 20px;
+            border-right: 30px solid #333;
+            border-left: 0;
+        }
+        #next {
+            right: 20px;
+            border-left: 30px solid #333;
+            border-right: 0;
+        }
+        /* Page info */
+        #page-info {
+            position: absolute;
+            bottom: 10px;
+            left: 50%;
+            transform: translateX(-50%);
+            background-color: rgba(0,0,0,0.5);
+            color: white;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-family: Arial, sans-serif;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+    <div class="flipbook-container">
+        <div id="flipbook">
+            <div class="page"><img src="pages/page1.jpg" alt="Page 1"></div>
+            <div class="page"><img src="pages/page2.jpg" alt="Page 2"></div>
+            <div class="page"><img src="pages/page3.jpg" alt="Page 3"></div>
+            <div class="page"><img src="pages/page4.jpg" alt="Page 4"></div>
+            <div class="page"><img src="pages/page5.jpg" alt="Page 5"></div>
+            <div class="page"><img src="pages/page6.jpg" alt="Page 6"></div>
+            <div class="page"><img src="pages/page7.jpg" alt="Page 7"></div>
+            <div class="page"><img src="pages/page8.jpg" alt="Page 8"></div>
+            <div class="page"><img src="pages/page9.jpg" alt="Page 9"></div>
+            <div class="page"><img src="pages/page10.jpg" alt="Page 10"></div>
+            <div class="page"><img src="pages/page11.jpg" alt="Page 11"></div>
+            <div class="page"><img src="pages/page12.jpg" alt="Page 12"></div>
+            <div class="page"><img src="pages/page13.jpg" alt="Page 13"></div>
+            <div class="page"><img src="pages/page14.jpg" alt="Page 14"></div>
+            <div class="page"><img src="pages/page15.jpg" alt="Page 15"></div>
+            <div class="page"><img src="pages/page16.jpg" alt="Page 16"></div>
+            <div class="page"><img src="pages/page17.jpg" alt="Page 17"></div>
+            <div class="page"><img src="pages/page18.jpg" alt="Page 18"></div>
+            <div class="page"><img src="pages/page19.jpg" alt="Page 19"></div>
+            <div class="page"><img src="pages/page20.jpg" alt="Page 20"></div>
+            <div class="page"><img src="pages/page21.jpg" alt="Page 21"></div>
+            <div class="page"><img src="pages/page22.jpg" alt="Page 22"></div>
+            <div class="page"><img src="pages/page23.jpg" alt="Page 23"></div>
+        </div>
+        
+        <!-- Triangle Navigation Buttons -->
+        <div class="nav-btn" id="prev"></div>
+        <div class="nav-btn" id="next"></div>
+        
+        <!-- Page info -->
+        <div id="page-info">Page <span id="current-page">1</span> of <span id="total-pages">23</span></div>
+    </div>
+    
+    <script>
+        $(document).ready(function() {
+            var totalPages = $("#flipbook > div").length;
+            $("#total-pages").text(totalPages);
+            
+            // Calculate dimensions based on container size and aspect ratio of your images
+            // Assuming your images are in 2550x3300 ratio
+            function calculateDimensions() {
+                var containerWidth = $(".flipbook-container").width();
+                var containerHeight = $(".flipbook-container").height();
+                
+                // Image aspect ratio
+                var imageRatio = 3300/2550;
+                
+                var width, height;
+                
+                // If container is wider than needed for full height
+                if (containerWidth / 2 > containerHeight / imageRatio) {
+                    height = containerHeight * 0.9; // 90% of container height
+                    width = (height / imageRatio) * 2; // Double width for two pages
+                } else {
+                    width = containerWidth * 0.9; // 90% of container width
+                    height = (width / 2) * imageRatio; // Height based on single page ratio
+                }
+                
+                return {
+                    width: width,
+                    height: height
+                };
+            }
+            
+            // Get initial dimensions
+            var dimensions = calculateDimensions();
+            
+            // Initialize the flipbook
+            $("#flipbook").turn({
+                width: dimensions.width,
+                height: dimensions.height,
+                autoCenter: true,
+                display: 'double',
+                acceleration: true,
+                elevation: 50,
+                gradients: true,
+                when: {
+                    turning: function(event, page, view) {
+                        $("#current-page").text(page);
+                    },
+                    turned: function(event, page, view) {
+                        $("#current-page").text(page);
+                    }
+                }
+            });
+            
+            // Update current page display
+            $("#current-page").text($("#flipbook").turn("page"));
+            
+            // Control buttons
+            $("#prev").click(function() {
+                $("#flipbook").turn("previous");
+            });
+            
+            $("#next").click(function() {
+                $("#flipbook").turn("next");
+            });
+            
+            // Handle keyboard navigation
+            $(document).keydown(function(e) {
+                if (e.keyCode == 37) { // left arrow
+                    $("#flipbook").turn("previous");
+                } else if (e.keyCode == 39) { // right arrow
+                    $("#flipbook").turn("next");
+                }
+            });
+            
+            // Handle window resize
+            $(window).resize(function() {
+                setTimeout(function() {
+                    var dimensions = calculateDimensions();
+                    $("#flipbook").turn("size", dimensions.width, dimensions.height);
+                }, 100);
+            });
+            
+            // Show/hide buttons on hover
+            $(".flipbook-container").hover(
+                function() {
+                    $(".nav-btn").css("opacity", "0.7");
+                },
+                function() {
+                    $(".nav-btn").css("opacity", "0.3");
+                }
+            );
+            
+            // Trigger resize once to ensure proper initial sizing
+            $(window).trigger('resize');
+        });
+    </script>
+</body>
+</html>
